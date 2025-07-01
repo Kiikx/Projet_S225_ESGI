@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', function () {
@@ -26,4 +27,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('projects.tasks', TaskController::class)->shallow();
+});
+
+
 require __DIR__ . '/auth.php';

@@ -7,7 +7,7 @@
         @foreach ($projects as $project)
             <li>
                 <a href="{{ route('projects.show', $project) }}">
-                    {{ $project->name }}
+                    {{ $project->name }} {{$project->id}} {{$project->owner->name}} {{$project->owner->id}}
                 </a>
             </li>
         @endforeach

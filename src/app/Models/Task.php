@@ -6,6 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
+    protected $fillable = [
+    'title',
+    'description',
+    'due_date',
+    'status',
+    'project_id',
+    'priority_id',
+    'category_id',
+    'creator_id',
+    'assigned_to_id',
+];
+
 
 public function project()
 {
@@ -26,5 +38,11 @@ public function priority()
 {
     return $this->belongsTo(\App\Models\Priority::class);
 }
+
+public function assignee()
+{
+    return $this->belongsTo(User::class, 'assigned_to_id');
+}
+
 
 }
