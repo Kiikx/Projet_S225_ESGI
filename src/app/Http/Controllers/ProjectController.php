@@ -7,6 +7,8 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Models\User;
+
 
 class ProjectController extends Controller
 {
@@ -40,9 +42,34 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Projet créé avec succès.');
     }
 
+    public function addMember(Request $request, Project $project)
+    {
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        if (!$project->members->contains($request->user_id)) {
+            $project->members()->attach($request->user_id);
+        }
+
+        return redirect()->back()->with('success', 'Utilisateur ajouté au projet.');
+    }
+    public function removeMember(Project $project, User $user)
+    {
+        // Vérifie que le user est bien membre
+        if ($project->members->contains($user->id)) {
+            $project->members()->detach($user->id);
+        }
+
+        return back()->with('success', 'Utilisateur retiré du projet.');
+    }
+
+
     public function show(Project $project)
     {
         $this->authorize('view', $project); // facultatif si tu veux gérer les accès
-        return view('projects.show', compact('project'));
+        $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))->get();
+
+        return view('projects.show', compact('project', 'availableUsers'));
     }
 }
