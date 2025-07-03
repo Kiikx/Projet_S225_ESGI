@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function index(Project $project)
+    public function index(Project $project): mixed
     {
         return view('tasks.index', compact('project'));
     }
@@ -24,13 +24,17 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority_id' => 'nullable|exists:priorities,id',
+            'assigned_to_id' => 'nullable|exists:users,id',
             'category_id' => 'nullable|exists:categories,id',
         ]);
 
-        $project->tasks()->create([
+       $task = $project->tasks()->create([
             ...$validated,
             'creator_id' => Auth::id(),
         ]);
+
+        $task->categories()->sync($request->categories ?? []);
+
 
         return redirect()->route('projects.show', $project)->with('success', 'Tâche créée');
     }
@@ -47,10 +51,13 @@ class TaskController extends Controller
         'description' => 'sometimes|nullable|string',
         'priority_id' => 'sometimes|nullable|exists:priorities,id',
         'category_id' => 'sometimes|nullable|exists:categories,id',
+        'assigned_to_id' => 'nullable|exists:users,id',
         'status' => 'sometimes|in:to_do,in_progress,done', 
     ]);
 
     $task->update($validated);
+
+    $task->categories()->sync($request->categories ?? []);
 
     return redirect()->route('projects.show', $task->project)->with('success', 'Tâche mise à jour');
     }

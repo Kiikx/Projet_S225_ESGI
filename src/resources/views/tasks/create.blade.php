@@ -24,11 +24,14 @@
                 </select>
             </div>
 
-            <div>
-                <label for="category_id" class="block font-semibold">Catégorie</label>
-                <select name="category_id" id="category_id" class="w-full border rounded p-2">
-                    @foreach(App\Models\Category::all() as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+            <div class="mb-4">
+                <label for="categories" class="block text-gray-700">Catégories</label>
+                <select name="categories[]" id="categories" multiple
+                    class="w-full border border-gray-300 rounded px-3 py-2">
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ (isset($task) && $task->categories->contains($category->id)) ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>

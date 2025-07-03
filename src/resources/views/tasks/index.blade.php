@@ -3,7 +3,7 @@
         <h2 class="text-2xl font-bold mb-4">Tâches pour le projet : {{ $project->title }}</h2>
 
         <a href="{{ route('projects.tasks.create', $project) }}"
-           class="inline-block mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            class="inline-block mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             + Nouvelle tâche
         </a>
 
@@ -12,6 +12,9 @@
                 <thead>
                     <tr class="bg-gray-200">
                         <th class="border p-2 text-left">Titre</th>
+                        <th class="border p-2 text-left">Assignée à</th>
+                        <th class="border p-2 text-left">Créateur</th>
+                        <th class="border p-2 text-left">Catégories</th>
                         <th class="border p-2 text-left">Statut</th>
                         <th class="border p-2 text-left">Actions</th>
                     </tr>
@@ -20,14 +23,36 @@
                     @foreach($project->tasks as $task)
                         <tr class="border-b">
                             <td class="border p-2">{{ $task->title }}</td>
-                            <td class="border p-2 capitalize">{{ $task->status ?? 'à faire' }}</td>
+
+                            <td class="border p-2">
+                                {{ $task->assignee?->name ?? 'Non assignée' }}
+                            </td>
+
+                            <td class="border p-2">
+                                {{ $task->creator?->name ?? 'Inconnu' }}
+                            </td>
+
+                            <td class="border p-2">
+                           
+                                @if($task->categories->count())
+                                    @foreach($task->categories as $category)
+                                        <span class="inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                                            {{ $category->name }}
+                                        </span>
+                                    @endforeach
+                                @else
+                                    Aucune
+                                @endif
+                            </td>
+                            <td class="border p-2 capitalize">
+                                {{ $task->status ?? 'à faire' }}
+                            </td>
+
                             <td class="border p-2 space-x-2">
-                                <a href="{{ route('tasks.edit', $task) }}" class="text-blue-600 hover:underline">
-                                    Modifier
-                                </a>
+                                <a href="{{ route('tasks.edit', $task) }}" class="text-blue-600 hover:underline">Modifier</a>
 
                                 <form action="{{ route('tasks.destroy', $task) }}" method="POST" class="inline-block"
-                                      onsubmit="return confirm('Supprimer cette tâche ?')">
+                                    onsubmit="return confirm('Supprimer cette tâche ?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline">
@@ -46,6 +71,7 @@
                                     </form>
                                 @endif
                             </td>
+
                         </tr>
                     @endforeach
                 </tbody>
