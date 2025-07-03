@@ -29,9 +29,9 @@ public function creator()
     return $this->belongsTo(\App\Models\User::class, 'creator_id');
 }
 
-public function category()
+public function categories()
 {
-    return $this->belongsTo(\App\Models\Category::class);
+    return $this->belongsToMany(\App\Models\Category::class);
 }
 
 public function priority()

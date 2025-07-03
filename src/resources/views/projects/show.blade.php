@@ -66,11 +66,37 @@
             </form>
         </div>
 
-        <!-- Section optionnelle des tâches récentes -->
+        <div class="mt-6 bg-white shadow rounded p-4 mb-2">
+            <h3 class="text-lg font-semibold mb-4">Catégories du projet</h3>
+
+            <form action="{{ route('projects.categories.store', $project) }}" method="POST" class="flex gap-4 mb-4">
+                @csrf
+                <input type="text" name="name" placeholder="Nom de la catégorie"
+                    class="border rounded px-3 py-2 w-full">
+                <button type="submit"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Ajouter</button>
+            </form>
+
+            <ul class="space-y-2">
+                @foreach($project->categories as $category)
+                    <li class="flex justify-between items-center border-b pb-2">
+                        <span>{{ $category->name }}</span>
+
+                        <form action="{{ route('projects.categories.destroy', [$project, $category]) }}" method="POST"
+                            onsubmit="return confirm('Supprimer cette catégorie ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-red-500 hover:underline text-sm" type="submit">Supprimer</button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+
+
         @if($project->tasks->count())
             <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Tâches récentes</h2>
-
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Tâches : </h2>
                 <ul class="space-y-2">
                     @foreach($project->tasks->take(5) as $task)
                         <li class="flex justify-between items-center bg-gray-50 border rounded px-4 py-2">

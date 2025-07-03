@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
+    protected $fillable = [
+    'name',
+    'project_id', 
+];
 
 public function project()
 {
@@ -14,7 +18,7 @@ public function project()
 
 public function tasks()
 {
-    return $this->hasMany(\App\Models\Task::class);
+    return $this->belongsToMany(\App\Models\Task::class);
 }
 
 }
