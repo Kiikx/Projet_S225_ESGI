@@ -39,6 +39,12 @@ class ProjectController extends Controller
 
         $project->members()->attach(Auth::id());
 
+        $project->statuses()->createMany([
+            ['name' => 'À faire'],
+            ['name' => 'En cours'],
+            ['name' => 'Terminé'],
+        ]);
+
         return redirect()->route('projects.index')->with('success', 'Projet créé avec succès.');
     }
 
@@ -67,7 +73,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $this->authorize('view', $project); 
+        $this->authorize('view', $project);
         $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))->get();
 
         return view('projects.show', compact('project', 'availableUsers'));
@@ -80,7 +86,7 @@ class ProjectController extends Controller
         $project->load('tasks.categories', 'tasks.assignee');
 
         $tasksByStatus = [
-            'todo' => $project->tasks->where('status', 'todo'),
+            'todo' => $project->tasks->where('status', 'to_do'),
             'doing' => $project->tasks->where('status', 'doing'),
             'done' => $project->tasks->where('status', 'done'),
         ];

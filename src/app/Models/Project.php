@@ -29,4 +29,9 @@ public function categories()
     return $this->hasMany(\App\Models\Category::class);
 }
 
+public function statuses()
+{
+    return $this->hasMany(Status::class);
+}
+
 }
