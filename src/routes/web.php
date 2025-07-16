@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use \App\Http\Controllers\CategoryController;
+use \App\Http\Controllers\StatusController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', function () {
@@ -35,6 +36,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('projects.kanban');
     Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus']);
+
+    Route::post('/projects/{project}/statuses', [StatusController::class, 'store'])->name('projects.statuses.store');
+    Route::delete('/projects/{project}/statuses/{status}', [StatusController::class, 'destroy'])->name('projects.statuses.destroy');
 
 });
 

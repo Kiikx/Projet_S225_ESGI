@@ -10,12 +10,12 @@ class Task extends Model
     'title',
     'description',
     'due_date',
-    'status',
     'project_id',
     'priority_id',
     'category_id',
     'creator_id',
     'assigned_to_id',
+    'status_id',
 ];
 
 
@@ -42,6 +42,11 @@ public function priority()
 public function assignee()
 {
     return $this->belongsTo(User::class, 'assigned_to_id');
+}
+
+public function status()
+{
+    return $this->belongsTo(Status::class);
 }
 
 

@@ -1,83 +1,100 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto py-6 px-4">
         <h2 class="text-2xl font-bold mb-6">Vue Kanban – {{ $project->title }}</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach(['todo' => 'À faire', 'doing' => 'En cours', 'done' => 'Terminée'] as $status => $label)
-                @php
-                    $tasks = $tasksByStatus[$status];
-                @endphp
+        @if (session('success'))
+            <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
 
-                <div class="bg-gray-100 rounded p-4 shadow min-h-[200px]">
-                    <h3 class="text-lg font-semibold mb-4">{{ $label }}</h3>
+        <div class="mt-6 mb-6">
+            <h3 class="text-lg font-semibold mb-2">Ajouter une colonne personnalisée</h3>
 
-                    <div id="{{ $status }}" data-status="{{ $status }}">
-                        @foreach($tasks as $task)
-                            <div class="bg-white rounded shadow p-3 mb-4" data-id="{{ $task->id }}">
-                                <h4 class="font-bold">{{ $task->title }}</h4>
-                                <p class="text-sm text-gray-600">{{ $task->description }}</p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Assignée à : {{ $task->assignee->name ?? 'Non assignée' }}<br>
-                                    Catégories :
-                                    @foreach($task->categories as $category)
-                                        <span class="inline-block bg-blue-200 text-blue-800 px-2 py-0.5 rounded text-xs mr-1">
+            <form action="{{ route('projects.statuses.store', $project) }}" method="POST" class="flex gap-2 items-center">
+                @csrf
+                <input type="text" name="name" placeholder="Nom de la colonne" required
+                    class="border p-2 rounded w-1/3">
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Ajouter
+                </button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-{{ $project->statuses->count() }} gap-6">
+            @foreach ($project->statuses as $status)
+                <div class="bg-gray-100 rounded shadow p-4">
+                    <h3 class="text-xl font-semibold mb-4">{{ $status->name }}</h3>
+
+                    <div class="task-column min-h-[50px]" data-status-id="{{ $status->id }}"
+                        ondragover="event.preventDefault();" ondrop="handleDrop(event, {{ $status->id }})">
+                        @forelse($status->tasks as $task)
+                            <div class="task bg-white p-3 mb-3 rounded shadow cursor-move" draggable="true"
+                                data-id="{{ $task->id }}" ondragstart="handleDragStart(event)">
+                                <p class="font-semibold">{{ $task->title }}</p>
+                                <p class="text-sm text-gray-500">Assigné à : {{ $task->assignee?->name ?? 'Personne' }}
+                                </p>
+                                <p class="text-sm text-gray-400">
+                                    @foreach ($task->categories as $category)
+                                        <span
+                                            class="inline-block bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded mr-1">
                                             {{ $category->name }}
                                         </span>
                                     @endforeach
                                 </p>
-                            </div>
-                        @endforeach
-                    </div>
 
-                    <p class="no-tasks text-sm text-gray-500 italic mt-2 {{ $tasks->isEmpty() ? '' : 'hidden' }}">
-                        Aucune tâche.
-                    </p>
+                            </div>
+                        @empty
+                            <p class="text-gray-400 italic">Aucune tâche</p>
+                        @endforelse
+                    </div>
+                    @if (!in_array($status->name, ['À faire', 'En cours', 'Terminé']) && $status->tasks->isEmpty())
+                        <form action="{{ route('projects.statuses.destroy', [$project, $status]) }}" method="POST"
+                            onsubmit="return confirm('Supprimer cette colonne ?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 text-sm hover:underline ml-2">
+                                ✕
+                            </button>
+                        </form>
+                    @endif
                 </div>
             @endforeach
         </div>
-
-        <a href="{{ route('projects.show', $project) }}" class="mt-6 inline-block text-blue-600 hover:underline">
-            ← Retour au projet
-        </a>
     </div>
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                ['todo', 'doing', 'done'].forEach(status => {
-                    const column = document.getElementById(status);
-                    new Sortable(column, {
-                        group: 'tasks',
-                        animation: 150,
-                        onEnd: function (evt) {
-                            const taskId = evt.item.dataset.id;
-                            const newStatus = evt.to.dataset.status;
+    <script>
+        let dragged;
 
-                            fetch(`/tasks/${taskId}/update-status`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: JSON.stringify({ status: newStatus })
-                            }).then(() => {
-                                // Met à jour dynamiquement le texte "Aucune tâche"
-                                ['todo', 'doing', 'done'].forEach(status => {
-                                    const col = document.getElementById(status);
-                                    const message = col.parentElement.querySelector('.no-tasks');
+        function handleDragStart(e) {
+            dragged = e.target;
+        }
 
-                                    if (col.children.length === 0) {
-                                        message.classList.remove('hidden');
-                                    } else {
-                                        message.classList.add('hidden');
-                                    }
-                                });
-                            });
-                        }
-                    });
+        function handleDrop(e, statusId) {
+            e.preventDefault();
+
+            if (!dragged || !dragged.dataset.id) return;
+
+            const taskId = dragged.dataset.id;
+            const column = e.currentTarget;
+
+            column.appendChild(dragged);
+
+            fetch(`/tasks/${taskId}/update-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        status_id: statusId
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        alert("Erreur lors de la mise à jour.");
+                    }
                 });
-            });
-        </script>
-    @endpush
+        }
+    </script>
 </x-app-layout>
