@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('deadline')->nullable();
-            $table->string('status')->default('to_do');
+            $table->string('status')->default('todo');
 
             $table->timestamps();
         });
