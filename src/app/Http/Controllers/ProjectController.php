@@ -67,9 +67,24 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $this->authorize('view', $project); // facultatif si tu veux gérer les accès
+        $this->authorize('view', $project); 
         $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))->get();
 
         return view('projects.show', compact('project', 'availableUsers'));
+    }
+
+    public function kanban(Project $project)
+    {
+        $this->authorize('view', $project);
+
+        $project->load('tasks.categories', 'tasks.assignee');
+
+        $tasksByStatus = [
+            'todo' => $project->tasks->where('status', 'todo'),
+            'doing' => $project->tasks->where('status', 'doing'),
+            'done' => $project->tasks->where('status', 'done'),
+        ];
+
+        return view('projects.kanban', compact('project', 'tasksByStatus'));
     }
 }

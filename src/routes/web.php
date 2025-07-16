@@ -33,6 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects/{project}/categories', [CategoryController::class, 'store'])->name('projects.categories.store');
     Route::delete('/projects/{project}/categories/{category}', [CategoryController::class, 'destroy'])->name('projects.categories.destroy');
 
+    Route::get('projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('projects.kanban');
+    Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus']);
+
 });
 
 

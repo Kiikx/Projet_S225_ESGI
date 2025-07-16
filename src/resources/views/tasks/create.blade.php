@@ -28,7 +28,7 @@
                 <label for="categories" class="block text-gray-700">Catégories</label>
                 <select name="categories[]" id="categories" multiple
                     class="w-full border border-gray-300 rounded px-3 py-2">
-                    @foreach($categories as $category)
+                    @foreach(App\Models\Category::all() as $category)
                         <option value="{{ $category->id }}" {{ (isset($task) && $task->categories->contains($category->id)) ? 'selected' : '' }}>
                             {{ $category->name }}
                         </option>

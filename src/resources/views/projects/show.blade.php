@@ -21,6 +21,11 @@
                     ➕ Ajouter une tâche
                 </a>
             </div>
+
+            <a href="{{ route('projects.kanban', $project) }}" class="text-blue-600 hover:underline ml-2">
+                Voir en mode Kanban
+            </a>
+
         </div>
 
         <div class="mt-6 bg-white shadow rounded p-4">

@@ -28,7 +28,7 @@ class TaskController extends Controller
             'category_id' => 'nullable|exists:categories,id',
         ]);
 
-       $task = $project->tasks()->create([
+        $task = $project->tasks()->create([
             ...$validated,
             'creator_id' => Auth::id(),
         ]);
@@ -46,20 +46,20 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
-    $validated = $request->validate([
-        'title' => 'sometimes|required|string|max:255',
-        'description' => 'sometimes|nullable|string',
-        'priority_id' => 'sometimes|nullable|exists:priorities,id',
-        'category_id' => 'sometimes|nullable|exists:categories,id',
-        'assigned_to_id' => 'nullable|exists:users,id',
-        'status' => 'sometimes|in:to_do,in_progress,done', 
-    ]);
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|nullable|string',
+            'priority_id' => 'sometimes|nullable|exists:priorities,id',
+            'category_id' => 'sometimes|nullable|exists:categories,id',
+            'assigned_to_id' => 'nullable|exists:users,id',
+            'status' => 'sometimes|in:todo,in_progress,done',
+        ]);
 
-    $task->update($validated);
+        $task->update($validated);
 
-    $task->categories()->sync($request->categories ?? []);
+        $task->categories()->sync($request->categories ?? []);
 
-    return redirect()->route('projects.show', $task->project)->with('success', 'Tâche mise à jour');
+        return redirect()->route('projects.show', $task->project)->with('success', 'Tâche mise à jour');
     }
 
     public function destroy(Task $task)
@@ -69,4 +69,17 @@ class TaskController extends Controller
 
         return redirect()->route('projects.show', $project)->with('success', 'Tâche supprimée');
     }
+
+    public function updateStatus(Request $request, Task $task)
+    {
+        $request->validate([
+            'status' => 'required|in:todo,doing,done',
+        ]);
+
+        $task->status = $request->status;
+        $task->save();
+
+        return response()->json(['success' => true]);
+    }
+
 }
