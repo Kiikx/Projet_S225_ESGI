@@ -30,7 +30,6 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority_id' => 'nullable|exists:priorities,id',
             'assigned_to_id' => 'nullable|exists:users,id',
-            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $todoStatus = $project->statuses()->where('name', 'À faire')->first();
@@ -57,9 +56,8 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
             'priority_id' => 'sometimes|nullable|exists:priorities,id',
-            'category_id' => 'sometimes|nullable|exists:categories,id',
             'assigned_to_id' => 'nullable|exists:users,id',
-            'status' => 'sometimes|in:todo,in_progress,done',
+            'status_id' => 'sometimes|nullable|exists:statuses,id',
         ]);
 
         $task->update($validated);
