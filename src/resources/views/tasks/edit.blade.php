@@ -3,6 +3,9 @@
         title="Modifier la tâche"
         subtitle="{{ $task->title }}">
         
+        <!-- Form Errors -->
+        <x-form-errors />
+        
         <form action="{{ route('tasks.update', $task) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')

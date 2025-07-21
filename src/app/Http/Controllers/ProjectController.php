@@ -100,6 +100,16 @@ class ProjectController extends Controller
         return view('projects.kanban', compact('project'));
     }
 
+    public function calendar(Project $project)
+    {
+        $this->authorize('view', $project);
+        
+        // Récupérer seulement les tâches qui ont une deadline
+        $tasksWithDeadline = $project->tasks()->whereNotNull('deadline')->with(['assignees', 'priority', 'categories'])->get();
+        
+        return view('projects.calendar', compact('project', 'tasksWithDeadline'));
+    }
+
     public function destroy(Project $project)
     {
         // Only the project owner can delete the project

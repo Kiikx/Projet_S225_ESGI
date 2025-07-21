@@ -3,6 +3,9 @@
         title="Nouvelle tâche"
         subtitle="Créer une tâche pour le projet {{ $project->name }}">
         
+        <!-- Form Errors -->
+        <x-form-errors />
+        
         <form action="{{ route('projects.tasks.store', $project) }}" method="POST" class="space-y-6">
             @csrf
 

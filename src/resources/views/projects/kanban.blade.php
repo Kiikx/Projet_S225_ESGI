@@ -66,9 +66,12 @@
                         type="text" 
                         name="name" 
                         placeholder="Nom de la nouvelle colonne (ex: En test, Validé...)" 
-                        class="w-full"
+                        class="w-full {{ $errors->has('name') ? 'border-red-500' : '' }}"
                         required
                     />
+                    @error('name')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
                 <button type="submit" class="btn-secondary flex items-center space-x-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('projects.kanban');
+    Route::get('projects/{project}/calendar', [ProjectController::class, 'calendar'])->name('projects.calendar');
     Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus']);
 
     Route::post('/projects/{project}/statuses', [StatusController::class, 'store'])->name('projects.statuses.store');

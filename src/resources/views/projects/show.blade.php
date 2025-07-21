@@ -22,18 +22,32 @@
             </div>
         </div>
 
-        <!-- Boutons d'action du projet -->
+        <!-- Boutons d'action principaux -->
         <div class="space-y-4">
-            <!-- HERO KANBAN BUTTON - GRANDE BANNIERE -->
-            <div class="text-center">
+            <!-- DEUX GROS BOUTONS PRINCIPAUX -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- BOUTON KANBAN -->
                 <a href="{{ route('projects.kanban', $project) }}"
-                   class="group relative inline-block overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-2xl shadow-xl transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                   class="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-2xl shadow-xl transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
                     <div class="absolute inset-0 bg-gradient-to-r from-white/0 to-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
                     <div class="relative flex items-center justify-center gap-3">
                         <span class="text-2xl">📊</span>
                         <div class="text-center">
-                            <div class="text-xl font-bold leading-tight mb-1">Accéder au Tableau Kanban</div>
+                            <div class="text-lg font-bold leading-tight mb-1">Tableau Kanban</div>
                             <div class="text-xs text-blue-100 font-normal">Gérez vos tâches visuellement</div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- BOUTON CALENDAR -->
+                <a href="{{ route('projects.calendar', $project) }}"
+                   class="group relative overflow-hidden bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-xl transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 to-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out"></div>
+                    <div class="relative flex items-center justify-center gap-3">
+                        <span class="text-2xl">📅</span>
+                        <div class="text-center">
+                            <div class="text-lg font-bold leading-tight mb-1">Vue Calendrier</div>
+                            <div class="text-xs text-green-100 font-normal">Planifiez dans le temps</div>
                         </div>
                     </div>
                 </a>

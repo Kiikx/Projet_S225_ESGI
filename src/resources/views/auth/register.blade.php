@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <!-- Form Errors -->
+    <x-form-errors />
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

@@ -6,6 +6,9 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+    <!-- Form Errors -->
+    <x-form-errors />
+
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
 

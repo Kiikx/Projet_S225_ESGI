@@ -33,6 +33,12 @@ php artisan migrate --force
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
+# Supprimer le fichier hot s'il existe (mode dev)
+if [ -f "public/hot" ]; then
+    echo "[INFO] Suppression du fichier hot (mode dev détecté)"
+    rm -f public/hot
+fi
+
 # Compiler les assets avec Vite (et afficher une erreur claire si échec)
 echo "[INFO] Build front avec Vite..."
 if ! npx vite build; then
