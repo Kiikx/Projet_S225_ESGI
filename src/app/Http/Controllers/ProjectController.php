@@ -40,9 +40,10 @@ class ProjectController extends Controller
         $project->members()->attach(Auth::id());
 
         $project->statuses()->createMany([
-            ['name' => 'À faire'],
-            ['name' => 'En cours'],
-            ['name' => 'Terminé'],
+            ['name' => 'À faire', 'is_protected' => true],
+            ['name' => 'En cours', 'is_protected' => true],
+            ['name' => 'Fait', 'is_terminal' => true, 'is_protected' => true], // Terminal !
+            ['name' => 'Annulé', 'is_protected' => false], // Supprimable
         ]);
 
         return redirect()->route('projects.index')->with('success', 'Projet créé avec succès.');
@@ -62,19 +63,32 @@ class ProjectController extends Controller
     }
     public function removeMember(Project $project, User $user)
     {
-        // Vérifie que le user est bien membre
-        if ($project->members->contains($user->id)) {
-            $project->members()->detach($user->id);
+        // Le propriétaire ne peut pas se retirer de son propre projet
+        if ($project->owner_id === $user->id) {
+            return back()->withErrors('Le propriétaire du projet ne peut pas se retirer du projet.');
+        }
+        
+        // Vérifier que l'utilisateur connecté est bien le propriétaire
+        if ($project->owner_id !== Auth::id()) {
+            return back()->withErrors('Seul le propriétaire peut retirer des membres.');
         }
 
-        return back()->with('success', 'Utilisateur retiré du projet.');
+        // Vérifier que le user est bien membre
+        if ($project->members->contains($user->id)) {
+            $project->members()->detach($user->id);
+            return back()->with('success', 'Utilisateur retiré du projet.');
+        }
+
+        return back()->withErrors('Cet utilisateur n\'est pas membre du projet.');
     }
 
 
     public function show(Project $project)
     {
         $this->authorize('view', $project);
-        $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))->get();
+        $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))
+                             ->where('id', '!=', auth()->id())
+                             ->get();
 
         return view('projects.show', compact('project', 'availableUsers'));
     }
@@ -82,15 +96,20 @@ class ProjectController extends Controller
     public function kanban(Project $project)
     {
         $this->authorize('view', $project);
+        
+        return view('projects.kanban', compact('project'));
+    }
 
-        $project->load('tasks.categories', 'tasks.assignee');
-
-        $tasksByStatus = [
-            'todo' => $project->tasks->where('status', 'to_do'),
-            'doing' => $project->tasks->where('status', 'doing'),
-            'done' => $project->tasks->where('status', 'done'),
-        ];
-
-        return view('projects.kanban', compact('project', 'tasksByStatus'));
+    public function destroy(Project $project)
+    {
+        // Only the project owner can delete the project
+        if ($project->owner_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Seul le propriétaire du projet peut le supprimer.');
+        }
+        
+        $projectName = $project->name;
+        $project->delete();
+        
+        return redirect()->route('projects.index')->with('success', 'Le projet "' . $projectName . '" a été supprimé avec succès.');
     }
 }

@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="container mx-auto px-4 py-6">
-        <h2 class="text-2xl font-bold mb-4">Créer une tâche pour le projet : {{ $project->title }}</h2>
+        <h2 class="text-2xl font-bold mb-6">Créer une tâche pour : {{ $project->name }}</h2>
 
         <form action="{{ route('projects.tasks.store', $project) }}" method="POST" class="space-y-4">
             @csrf
@@ -37,13 +37,13 @@
             </div>
 
             <div>
-                <label for="assigned_to_id" class="block font-semibold">Assigner à</label>
-                <select name="assigned_to_id" id="assigned_to_id" class="w-full border rounded p-2">
-                    <option value="">-- Aucun --</option>
-                    @foreach(App\Models\User::all() as $user)
+                <label for="assignees" class="block font-semibold">Assigner à (membres du projet)</label>
+                <select name="assignees[]" id="assignees" multiple class="w-full border rounded p-2">
+                    @foreach($project->members as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
                 </select>
+                <small class="text-gray-500">Maintenez Ctrl pour sélectionner plusieurs personnes</small>
             </div>
 
 

@@ -6,15 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    protected $fillable = [
+protected $fillable = [
     'title',
     'description',
     'due_date',
     'project_id',
     'priority_id',
-    'category_id',
     'creator_id',
-    'assigned_to_id',
     'status_id',
 ];
 
@@ -39,9 +37,12 @@ public function priority()
     return $this->belongsTo(\App\Models\Priority::class);
 }
 
-public function assignee()
+/**
+ * Une tâche peut être assignée à plusieurs utilisateurs
+ */
+public function assignees()
 {
-    return $this->belongsTo(User::class, 'assigned_to_id');
+    return $this->belongsToMany(User::class)->withTimestamps();
 }
 
 public function status()

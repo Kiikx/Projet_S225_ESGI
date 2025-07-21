@@ -8,7 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn('status'); // Suppression du champ texte
+            // Vérifier si la colonne existe avant de la supprimer
+            if (Schema::hasColumn('tasks', 'status')) {
+                $table->dropColumn('status'); // Suppression du champ texte
+            }
         });
     }
 

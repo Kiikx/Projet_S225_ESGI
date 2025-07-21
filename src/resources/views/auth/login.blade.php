@@ -39,9 +39,21 @@
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
+            <x-primary-button class="ms-4">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
     </form>
+
+    <!-- Lien d'inscription séparé -->
+    @if (Route::has('register'))
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">
+                {{ __('Don\'t have an account?') }}
+                <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    {{ __('Sign up') }}
+                </a>
+            </p>
+        </div>
+    @endif
 </x-guest-layout>

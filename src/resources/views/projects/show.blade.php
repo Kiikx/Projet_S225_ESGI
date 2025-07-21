@@ -1,11 +1,26 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto px-4 py-6">
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ $project->title }}</h1>
-            <p class="text-gray-600">{{ $project->description ?? 'Aucune description.' }}</p>
-
-            <div class="mt-4 text-sm text-gray-500">
-                Créé par : {{ $project->owner->name ?? 'Inconnu' }}
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ $project->name }}</h1>
+                    <p class="text-gray-600">{{ $project->description ?? 'Aucune description.' }}</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        Créé par : {{ $project->owner->name ?? 'Inconnu' }}
+                    </div>
+                </div>
+                
+                @if($project->owner_id === auth()->id())
+                    <form action="{{ route('projects.destroy', $project) }}" method="POST" 
+                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.')" 
+                          class="ml-4">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-sm">
+                            🗑️ Supprimer le projet
+                        </button>
+                    </form>
+                @endif
             </div>
 
             <div class="mt-6 flex flex-wrap gap-4">
@@ -38,16 +53,27 @@
                     <ul class="space-y-2">
                         @foreach ($project->members as $member)
                             <li class="flex justify-between items-center border-b pb-2">
-                                <span>{{ $member->name }}</span>
+                                <div>
+                                    <span>{{ $member->name }}</span>
+                                    @if($member->id === $project->owner_id)
+                                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Propriétaire
+                                        </span>
+                                    @endif
+                                </div>
 
-                                <form action="{{ route('projects.removeMember', [$project, $member]) }}" method="POST"
-                                    onsubmit="return confirm('Retirer ce membre ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="text-red-500 hover:underline text-sm" type="submit">
-                                        Retirer
-                                    </button>
-                                </form>
+                                @if($member->id !== $project->owner_id)
+                                    <form action="{{ route('projects.removeMember', [$project, $member]) }}" method="POST"
+                                        onsubmit="return confirm('Retirer ce membre ?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-500 hover:underline text-sm" type="submit">
+                                            Retirer
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="text-gray-400 text-sm">Ne peut pas être retiré</span>
+                                @endif
                             </li>
                         @endforeach
                     </ul>
@@ -58,11 +84,9 @@
                 @csrf
                 <select name="user_id" class="border rounded px-3 py-2 w-full">
                     <option value="">-- Choisir un utilisateur --</option>
-                    @foreach (App\Models\User::where('id', '!=', auth()->id())->get() as $user)
-@if (!$project->members->contains($user))
-<option value="{{ $user->id }}">{{ $user->name }}</option>
-@endif
-@endforeach
+                    @foreach ($availableUsers as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                    @endforeach
                 </select>
 
                 <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -71,32 +95,6 @@
             </form>
         </div>
 
-        <div class="mt-6 bg-white shadow rounded p-4 mb-2">
-            <h3 class="text-lg font-semibold mb-4">Catégories du projet</h3>
-
-            <form action="{{ route('projects.categories.store', $project) }}" method="POST" class="flex gap-4 mb-4">
-                @csrf
-                <input type="text" name="name" placeholder="Nom de la catégorie"
-                    class="border rounded px-3 py-2 w-full">
-                <button type="submit"
-                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Ajouter</button>
-            </form>
-
-            <ul class="space-y-2">
-                @foreach ($project->categories as $category)
-<li class="flex justify-between items-center border-b pb-2">
-                        <span>{{ $category->name }}</span>
-
-                        <form action="{{ route('projects.categories.destroy', [$project, $category]) }}" method="POST"
-                            onsubmit="return confirm('Supprimer cette catégorie ?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="text-red-500 hover:underline text-sm" type="submit">Supprimer</button>
-                        </form>
-                    </li>
- @endforeach
-                        </ul>
-                        </div>
 
 
                         @if ($project->tasks->count())

@@ -3,6 +3,14 @@ set -e
 
 cd /var/www
 
+# Attendre que MySQL soit disponible
+echo "[INFO] Attente de MySQL..."
+while ! php artisan migrate:status >/dev/null 2>&1; do
+    echo "[INFO] MySQL pas encore disponible, attente 3s..."
+    sleep 3
+done
+echo "[INFO] MySQL est prêt !"
+
 # Installer les dépendances PHP si vendor n'existe pas
 if [ ! -d "vendor" ]; then
     composer install
@@ -32,4 +40,10 @@ if ! npx vite build; then
     exit 1
 fi
 
-exec php-fpm 
+echo "[DEBUG] About to start PHP-FPM..."
+echo "[DEBUG] PHP version: $(php --version | head -n1)"
+echo "[DEBUG] Current directory: $(pwd)"
+echo "[DEBUG] Available files: $(ls -la | head -5)"
+
+echo "[INFO] Starting PHP-FPM server..."
+exec php-fpm -F

@@ -24,10 +24,9 @@ public function tasks()
     return $this->hasMany(\App\Models\Task::class);
 }
 
-public function categories()
-{
-    return $this->hasMany(\App\Models\Category::class);
-}
+/**
+ * Les catégories sont maintenant globales, plus de relation directe avec les projets
+ */
 
 public function statuses()
 {

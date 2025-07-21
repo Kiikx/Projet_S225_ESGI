@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="container mx-auto px-4 py-6">
-        <h2 class="text-2xl font-bold mb-4">Tâches pour le projet : {{ $project->title }}</h2>
+        <h2 class="text-2xl font-bold mb-4">Tâches pour le projet : {{ $project->name }}</h2>
 
         <a href="{{ route('projects.tasks.create', $project) }}"
             class="inline-block mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -25,7 +25,15 @@
                             <td class="border p-2">{{ $task->title }}</td>
 
                             <td class="border p-2">
-                                {{ $task->assignee?->name ?? 'Non assignée' }}
+                                @if($task->assignees->count())
+                                    @foreach($task->assignees as $assignee)
+                                        <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-1">
+                                            {{ $assignee->name }}
+                                        </span>
+                                    @endforeach
+                                @else
+                                    <span class="text-gray-500">Non assignée</span>
+                                @endif
                             </td>
 
                             <td class="border p-2">
@@ -44,8 +52,14 @@
                                     Aucune
                                 @endif
                             </td>
-                            <td class="border p-2 capitalize">
-                                {{ $task->status ?? 'à faire' }}
+                            <td class="border p-2">
+                                <span class="px-2 py-1 rounded text-sm 
+                                    @if($task->status?->name === 'Fait') bg-green-100 text-green-800
+                                    @elseif($task->status?->name === 'En cours') bg-yellow-100 text-yellow-800  
+                                    @elseif($task->status?->name === 'Annulé') bg-red-100 text-red-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ $task->status?->name ?? 'À faire' }}
+                                </span>
                             </td>
 
                             <td class="border p-2 space-x-2">
@@ -60,15 +74,20 @@
                                     </button>
                                 </form>
 
-                                @if($task->status !== 'done')
-                                    <form action="{{ route('tasks.update', $task) }}" method="POST" class="inline-block">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="done">
-                                        <button type="submit" class="text-green-600 hover:underline">
-                                            Marquer comme terminée
-                                        </button>
-                                    </form>
+                                @if($task->status?->name !== 'Fait')
+                                    @php
+                                        $doneStatus = $project->statuses->where('name', 'Fait')->first();
+                                    @endphp
+                                    @if($doneStatus)
+                                        <form action="{{ route('tasks.update', $task) }}" method="POST" class="inline-block">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status_id" value="{{ $doneStatus->id }}">
+                                            <button type="submit" class="text-green-600 hover:underline">
+                                                Marquer comme terminée
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
                             </td>
 

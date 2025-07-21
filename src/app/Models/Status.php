@@ -9,7 +9,12 @@ class Status extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'project_id'];
+    protected $fillable = ['name', 'project_id', 'is_terminal', 'is_protected'];
+    
+    protected $casts = [
+        'is_terminal' => 'boolean',
+        'is_protected' => 'boolean',
+    ];
 
     public function project()
     {

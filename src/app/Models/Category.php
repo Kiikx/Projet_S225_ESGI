@@ -7,18 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model
 {
     protected $fillable = [
-    'name',
-    'project_id', 
-];
+        'name',
+    ];
 
-public function project()
-{
-    return $this->belongsTo(\App\Models\Project::class);
-}
-
-public function tasks()
-{
-    return $this->belongsToMany(\App\Models\Task::class);
-}
-
+    /**
+     * Les catégories sont des labels globaux, plus de relation avec les projets
+     */
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class);
+    }
 }
