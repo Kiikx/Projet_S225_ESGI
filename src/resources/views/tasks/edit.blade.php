@@ -1,63 +1,86 @@
 <x-app-layout>
-    <div class="container mx-auto px-4 py-6">
-        <h2 class="text-2xl font-bold mb-4">Modifier la tâche : {{ $task->title }}</h2>
-
-        <form action="{{ route('tasks.update', $task) }}" method="POST" class="space-y-4">
+    <x-form-container 
+        title="Modifier la tâche"
+        subtitle="{{ $task->title }}">
+        
+        <form action="{{ route('tasks.update', $task) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 
-            <div>
-                <label for="title" class="block font-semibold">Titre</label>
-                <input type="text" name="title" id="title" value="{{ old('title', $task->title) }}"
-                    class="w-full border rounded p-2" required>
+            <x-form-group>
+                <x-input-label for="title" :required="true">Titre de la tâche</x-input-label>
+                <x-text-input 
+                    id="title" 
+                    name="title" 
+                    type="text" 
+                    value="{{ old('title', $task->title) }}"
+                    placeholder="Ex: Finaliser la maquette de la page d'accueil"
+                    required />
+            </x-form-group>
+
+            <x-form-group>
+                <x-input-label for="description">Description</x-input-label>
+                <x-textarea-input 
+                    id="description" 
+                    name="description" 
+                    placeholder="Décrivez les détails de cette tâche..."
+                    rows="4">{{ old('description', $task->description) }}</x-textarea-input>
+            </x-form-group>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <x-form-group>
+                    <x-input-label for="priority_id">Priorité</x-input-label>
+                    <x-select-input id="priority_id" name="priority_id">
+                        <option value="" {{ !$task->priority_id ? 'selected' : '' }}>Sélectionner une priorité</option>
+                        @foreach(App\Models\Priority::orderByLevel()->get() as $priority)
+                            <option value="{{ $priority->id }}" {{ $task->priority_id == $priority->id ? 'selected' : '' }}>
+                                {{ $priority->label }}
+                            </option>
+                        @endforeach
+                    </x-select-input>
+                </x-form-group>
+
+                <x-form-group>
+                    <x-input-label for="deadline">Date limite</x-input-label>
+                    <x-text-input 
+                        id="deadline" 
+                        name="deadline" 
+                        type="date"
+                        value="{{ old('deadline', $task->deadline ? $task->deadline->format('Y-m-d') : '') }}" />
+                    <p class="text-xs text-neutral-500 mt-1">Optionnel - laissez vide si aucune date limite</p>
+                </x-form-group>
             </div>
 
-            <div>
-                <label for="description" class="block font-semibold">Description</label>
-                <textarea name="description" id="description"
-                    class="w-full border rounded p-2">{{ old('description', $task->description) }}</textarea>
+            <x-form-group>
+                <x-input-label for="categories">Catégories</x-input-label>
+                <x-multiselect 
+                    name="categories"
+                    placeholder="Choisir des catégories..."
+                    searchPlaceholder="Rechercher une catégorie..."
+                    :options="collect(App\Models\Category::all())->map(fn($cat) => ['value' => $cat->id, 'label' => $cat->name])->toArray()"
+                    :selected="$task->categories->pluck('id')->map(fn($id) => (string)$id)->toArray()"
+                />
+                <p class="text-xs text-neutral-500 mt-1">Tapez pour rechercher et cliquez pour sélectionner</p>
+            </x-form-group>
+
+            <x-form-group>
+                <x-input-label for="assignees">Assigner à</x-input-label>
+                <x-multiselect 
+                    name="assignees"
+                    placeholder="Choisir des membres..."
+                    searchPlaceholder="Rechercher un membre..."
+                    :options="$task->project->members->map(fn($user) => ['value' => $user->id, 'label' => $user->name])->toArray()"
+                    :selected="$task->assignees->pluck('id')->map(fn($id) => (string)$id)->toArray()"
+                />
+                <p class="text-xs text-neutral-500 mt-1">Sélectionnez les membres qui travailleront sur cette tâche</p>
+            </x-form-group>
+
+            <div class="flex justify-center pt-6 border-t border-neutral-200">
+                <x-primary-button>
+                    <span class="text-lg mr-2">🔄</span>
+                    Mettre à jour la tâche
+                </x-primary-button>
             </div>
-
-            <div>
-                <label for="priority_id" class="block font-semibold">Priorité</label>
-                <select name="priority_id" id="priority_id" class="w-full border rounded p-2">
-                    @foreach(App\Models\Priority::all() as $priority)
-                        <option value="{{ $priority->id }}" {{ $task->priority_id == $priority->id ? 'selected' : '' }}>
-                            {{ $priority->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label for="categories" class="block text-gray-700">Catégories</label>
-                <select name="categories[]" id="categories" multiple
-                    class="w-full border border-gray-300 rounded px-3 py-2">
-                    @foreach(App\Models\Category::all() as $category)
-                        <option value="{{ $category->id }}" {{ (isset($task) && $task->categories->contains($category->id)) ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label for="assignees" class="block font-semibold">Assigner à (membres du projet)</label>
-                <select name="assignees[]" id="assignees" multiple class="w-full border rounded p-2">
-                    @foreach($task->project->members as $user)
-                        <option value="{{ $user->id }}" 
-                            {{ $task->assignees->contains($user->id) ? 'selected' : '' }}>
-                            {{ $user->name }}
-                        </option>
-                    @endforeach
-                </select>
-                <small class="text-gray-500">Maintenez Ctrl pour sélectionner plusieurs personnes</small>
-            </div>
-
-
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Mettre à jour
-            </button>
         </form>
-    </div>
+    </x-form-container>
 </x-app-layout>

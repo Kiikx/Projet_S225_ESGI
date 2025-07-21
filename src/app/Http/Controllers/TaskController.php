@@ -29,6 +29,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority_id' => 'nullable|exists:priorities,id',
+            'deadline' => 'nullable|date|after_or_equal:today',
             'assignees' => 'nullable|array',
             'assignees.*' => 'exists:users,id',
         ]);
@@ -60,6 +61,7 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
             'priority_id' => 'sometimes|nullable|exists:priorities,id',
+            'deadline' => 'sometimes|nullable|date',
             'assignees' => 'nullable|array',
             'assignees.*' => 'exists:users,id',
             'status_id' => 'sometimes|nullable|exists:statuses,id',
@@ -99,7 +101,20 @@ class TaskController extends Controller
             'status_id' => 'required|exists:statuses,id',
         ]);
 
+        $oldStatusId = $task->status_id;
+        $newStatus = \App\Models\Status::find($validated['status_id']);
+        
         $task->status_id = $validated['status_id'];
+        
+        // Auto-complétion : marquer comme complété si passage vers statut terminal
+        if ($newStatus && $newStatus->is_terminal && !$task->completed_at) {
+            $task->completed_at = now();
+        }
+        // Si on revient d'un statut terminal vers un non-terminal, enlever la complétion
+        elseif ($task->completed_at && $newStatus && !$newStatus->is_terminal) {
+            $task->completed_at = null;
+        }
+        
         $task->save();
 
         return response()->json(['success' => true]);
