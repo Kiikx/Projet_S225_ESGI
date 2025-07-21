@@ -30,6 +30,24 @@ services:
     networks:
       - kanboard
 
+  # Service dédié pour Vite dev server
+  vite:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: kanboard_vite
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+      - /var/www/node_modules
+    ports:
+      - "5173:5173"
+    entrypoint: []
+    command: ["/bin/bash", "-c", "cd /var/www && npm install && npm run dev"]
+    networks:
+      - kanboard
+
   db:
     image: mysql:8.0
     container_name: kanboard_db
