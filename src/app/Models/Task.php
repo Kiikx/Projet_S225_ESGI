@@ -9,11 +9,17 @@ class Task extends Model
 protected $fillable = [
     'title',
     'description',
-    'due_date',
     'project_id',
     'priority_id',
     'creator_id',
     'status_id',
+    'completed_at',
+    'deadline',
+];
+
+protected $casts = [
+    'completed_at' => 'datetime',
+    'deadline' => 'datetime',
 ];
 
 

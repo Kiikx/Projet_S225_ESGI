@@ -1,3 +1,60 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Styles globaux pour la DA */
+@layer base {
+    body {
+        @apply bg-gradient-subtle;
+    }
+}
+
+@layer components {
+    /* Card avec effet glassmorphism */
+    .glass-card {
+        @apply bg-white/70 backdrop-blur-sm border border-white/20 shadow-lg;
+    }
+    
+    /* Header avec gradient */
+    .gradient-header {
+        @apply bg-gradient-header text-white shadow-lg;
+    }
+    
+    /* Navigation moderne */
+    .nav-modern {
+        @apply bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm;
+    }
+    
+    /* Bouton primaire avec gradient */
+    .btn-gradient {
+        @apply bg-gradient-to-r from-primary-500 to-accent-500 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105;
+    }
+    
+    /* Badge moderne */
+    .badge-modern {
+        @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary-100 to-accent-100 text-primary-800 border border-primary-200/50;
+    }
+    
+    /* Animation de apparition */
+    .animate-appear {
+        @apply animate-fade-in;
+    }
+    
+    /* Card hover effect */
+    .card-hover {
+        @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    }
+    
+    /* Accent gradient pour les éléments de UI */
+    .accent-gradient {
+        @apply bg-gradient-to-r from-primary-500 via-primary-600 to-accent-600;
+    }
+    
+    /* Utilitaire pour tronquer le texte */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
