@@ -2,7 +2,7 @@
     <div class="p-6 space-y-6">
         <!-- En-tête stylé -->
         <div class="glass-card rounded-xl p-6 animate-appear">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="h-12 w-12 accent-gradient rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 mt-4 sm:mt-0">
                     <a href="{{ route('projects.kanban', $project) }}" class="btn-outline flex items-center space-x-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>

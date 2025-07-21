@@ -5,16 +5,17 @@
             <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-700 to-blue-600 bg-clip-text text-transparent mb-3">{{ $project->name }}</h1>
             <p class="text-gray-600 mb-6">{{ $project->description ?? 'Aucune description.' }}</p>
             
-            <div class="flex items-center justify-center gap-8 text-sm text-gray-600">
-                <div class="flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full">
+            <!-- Version responsive : empilage sur mobile, ligne sur desktop -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm text-gray-600">
+                <div class="flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full flex-shrink-0">
                     <span class="text-purple-500">👤</span>
-                    <span>Propriétaire : <strong class="text-purple-700">{{ $project->owner->name ?? 'Inconnu' }}</strong></span>
+                    <span class="text-center sm:text-left">Propriétaire : <strong class="text-purple-700">{{ $project->owner->name ?? 'Inconnu' }}</strong></span>
                 </div>
-                <div class="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                <div class="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full flex-shrink-0">
                     <span class="text-blue-500">👥</span>
                     <span><strong class="text-blue-700">{{ $project->members->count() }}</strong> membre(s)</span>
                 </div>
-                <div class="flex items-center gap-2 bg-indigo-50 px-3 py-1 rounded-full">
+                <div class="flex items-center gap-2 bg-indigo-50 px-3 py-1 rounded-full flex-shrink-0">
                     <span class="text-indigo-500">📅</span>
                     <span>Créé le <strong class="text-indigo-700">{{ $project->created_at->format('d/m/Y') }}</strong></span>
                 </div>
