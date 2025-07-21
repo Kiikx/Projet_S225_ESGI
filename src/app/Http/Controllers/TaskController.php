@@ -29,17 +29,21 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority_id' => 'nullable|exists:priorities,id',
-            'assigned_to_id' => 'nullable|exists:users,id',
+            'assignees' => 'nullable|array',
+            'assignees.*' => 'exists:users,id',
         ]);
 
         $todoStatus = $project->statuses()->where('name', 'À faire')->first();
+        // On exclut assignees du fillable (relation many-to-many)
+        $taskData = collect($validated)->except('assignees')->toArray();
         $task = $project->tasks()->create([
-            ...$validated,
+            ...$taskData,
             'creator_id' => Auth::id(),
             'status_id' => $todoStatus->id,
         ]);
 
         $task->categories()->sync($request->categories ?? []);
+        $task->assignees()->sync($request->assignees ?? []);
 
 
         return redirect()->route('projects.show', $project)->with('success', 'Tâche créée');
@@ -56,13 +60,25 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|nullable|string',
             'priority_id' => 'sometimes|nullable|exists:priorities,id',
-            'assigned_to_id' => 'nullable|exists:users,id',
+            'assignees' => 'nullable|array',
+            'assignees.*' => 'exists:users,id',
             'status_id' => 'sometimes|nullable|exists:statuses,id',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ]);
 
-        $task->update($validated);
+        // On exclut assignees et categories du fillable (relations many-to-many)
+        $taskData = collect($validated)->except(['assignees', 'categories'])->toArray();
+        $task->update($taskData);
 
-        $task->categories()->sync($request->categories ?? []);
+        // Ne synchroniser les relations que si elles sont présentes dans la requête
+        if ($request->has('categories')) {
+            $task->categories()->sync($request->categories ?? []);
+        }
+        
+        if ($request->has('assignees')) {
+            $task->assignees()->sync($request->assignees ?? []);
+        }
 
         return redirect()->route('projects.show', $task->project)->with('success', 'Tâche mise à jour');
     }

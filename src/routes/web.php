@@ -25,14 +25,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
     Route::post('/projects/{project}/add-member', [ProjectController::class, 'addMember'])->name('projects.addMember');
     Route::delete('/projects/{project}/remove-member/{user}', [ProjectController::class, 'removeMember'])->name('projects.removeMember');
 
     Route::resource('projects.tasks', TaskController::class)->shallow();
 
-    Route::post('/projects/{project}/categories', [CategoryController::class, 'store'])->name('projects.categories.store');
-    Route::delete('/projects/{project}/categories/{category}', [CategoryController::class, 'destroy'])->name('projects.categories.destroy');
+    // Administration des labels globaux (accès admin uniquement)
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('/admin/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    });
 
     Route::get('projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('projects.kanban');
     Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus']);

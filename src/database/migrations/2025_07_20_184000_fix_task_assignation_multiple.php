@@ -9,10 +9,10 @@ return new class extends Migration {
     /**
      * Run the migrations.
      * 
-     * RÉPARATION : Permettre assignation multiple des tâches
-     * - Créer table pivot task_user
-     * - Migrer les assignations existantes
-     * - Supprimer assigned_to_id obsolète
+     * Permet l'assignation de tâches à plusieurs utilisateurs
+     * - Crée une table pivot task_user
+     * - Migre les assignations existantes
+     * - Supprime l'ancienne colonne assigned_to_id
      */
     public function up(): void
     {

@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -62,5 +63,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function tasks()
     {
         return $this->hasMany(\App\Models\Task::class, 'creator_id');
+    }
+
+    /**
+     * Vérifier si l'utilisateur est admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }

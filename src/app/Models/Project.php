@@ -25,8 +25,7 @@ public function tasks()
 }
 
 /**
- * RÉPARATION : Les catégories sont maintenant globales
- * Plus de relation avec les projets
+ * Les catégories sont maintenant globales, plus de relation directe avec les projets
  */
 
 public function statuses()

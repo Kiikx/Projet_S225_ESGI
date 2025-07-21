@@ -3,32 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    public function store(Request $request, Project $project)
+    /**
+     * Gestion des labels globaux
+     * Les catégories sont maintenant des labels utilisables dans tous les projets
+     */
+    
+    public function index()
+    {
+        // Le middleware 'admin' gère déjà les permissions !
+        $categories = Category::orderBy('name')->get();
+        return view('categories.index', compact('categories'));
+    }
+
+    public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name',
         ]);
 
-        $project->categories()->create([
+        Category::create([
             'name' => $request->name,
         ]);
 
-        return back()->with('success', 'Catégorie ajoutée.');
+        return back()->with('success', 'Label ajouté avec succès.');
     }
 
-    public function destroy(Project $project, Category $category)
+    public function destroy(Category $category)
     {
-        if ($category->project_id !== $project->id) {
-            abort(403);
+        // Vérifier si la catégorie est utilisée
+        if ($category->tasks()->count() > 0) {
+            return back()->withErrors('Ce label est utilisé par des tâches et ne peut pas être supprimé.');
         }
 
         $category->delete();
-
-        return back()->with('success', 'Catégorie supprimée.');
+        return back()->with('success', 'Label supprimé.');
     }
 }

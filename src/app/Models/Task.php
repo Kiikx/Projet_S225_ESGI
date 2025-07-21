@@ -38,7 +38,6 @@ public function priority()
 }
 
 /**
- * RÉPARATION : Assignation multiple des tâches
  * Une tâche peut être assignée à plusieurs utilisateurs
  */
 public function assignees()

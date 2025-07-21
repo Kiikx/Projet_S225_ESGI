@@ -11,8 +11,7 @@ class Category extends Model
     ];
 
     /**
-     * RÉPARATION : Les catégories sont maintenant des labels globaux
-     * Plus de relation avec les projets !
+     * Les catégories sont des labels globaux, plus de relation avec les projets
      */
     public function tasks()
     {
