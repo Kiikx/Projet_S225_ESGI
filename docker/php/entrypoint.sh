@@ -45,5 +45,11 @@ echo "[DEBUG] PHP version: $(php --version | head -n1)"
 echo "[DEBUG] Current directory: $(pwd)"
 echo "[DEBUG] Available files: $(ls -la | head -5)"
 
-echo "[INFO] Starting PHP-FPM server..."
-exec php-fpm -F
+# Détecter l'environnement et démarrer le bon serveur
+if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    echo "[INFO] Starting Laravel development server for Railway..."
+    exec php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+else
+    echo "[INFO] Starting PHP-FPM server for development..."
+    exec php-fpm -F
+fi

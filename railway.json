@@ -1,5 +1,6 @@
 {
   "build": {
-    "builder": "docker"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "docker/php/Dockerfile"
   }
 }
