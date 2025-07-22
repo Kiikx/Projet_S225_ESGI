@@ -94,6 +94,7 @@
                 <div class="flex space-x-2">
                     <button class="view-btn active" data-view="month">Mois</button>
                     <button class="view-btn" data-view="week">Semaine</button>
+                    <button class="view-btn" data-view="3days">3 Jours</button>
                     <button class="view-btn" data-view="day">Jour</button>
                 </div>
             </div>
@@ -158,6 +159,11 @@
             min-height: 400px;
         }
         
+        .calendar-3days {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        
         .calendar-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             @apply text-white font-semibold text-center py-3 text-sm rounded-lg shadow-md;
@@ -198,8 +204,15 @@
         }
         
         .task-item {
-            @apply text-xs px-3 py-2 rounded-lg mb-2 cursor-pointer truncate block transition-all duration-200 shadow-sm hover:shadow-md;
+            @apply text-xs px-2 py-1.5 rounded-lg mb-1.5 cursor-pointer block transition-all duration-200 shadow-sm hover:shadow-md;
             transform: translateX(0);
+            line-height: 1.3;
+            word-wrap: break-word;
+            white-space: normal;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
         .task-item:hover {
@@ -315,6 +328,11 @@
                 const endOfWeek = new Date(startOfWeek);
                 endOfWeek.setDate(startOfWeek.getDate() + 6);
                 periodElement.textContent = `Semaine du ${startOfWeek.getDate()}/${startOfWeek.getMonth() + 1} au ${endOfWeek.getDate()}/${endOfWeek.getMonth() + 1}`;
+            } else if (currentView === '3days') {
+                const startDate = new Date(currentDate);
+                const endDate = new Date(currentDate);
+                endDate.setDate(startDate.getDate() + 2);
+                periodElement.textContent = `3 jours du ${startDate.getDate()}/${startDate.getMonth() + 1} au ${endDate.getDate()}/${endDate.getMonth() + 1}`;
             } else if (currentView === 'day') {
                 periodElement.textContent = `${dayNames[currentDate.getDay()]} ${currentDate.getDate()} ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
             }
@@ -333,8 +351,12 @@
                 // Gérer différents formats de date
                 let taskDateStr;
                 if (typeof task.deadline === 'string') {
-                    // Format Laravel timestamp: "2025-07-22 14:30:00" ou "2025-07-22"
-                    taskDateStr = task.deadline.split(' ')[0];
+                    // Format ISO: "2025-08-29T00:00:00.000000Z" ou Laravel: "2025-07-22 14:30:00" ou "2025-07-22"
+                    if (task.deadline.includes('T')) {
+                        taskDateStr = task.deadline.split('T')[0];
+                    } else {
+                        taskDateStr = task.deadline.split(' ')[0];
+                    }
                 } else if (task.deadline instanceof Date) {
                     taskDateStr = task.deadline.toISOString().split('T')[0];
                 } else {
@@ -356,32 +378,90 @@
 
         function createTaskElement(task) {
             const taskElement = document.createElement('div');
-            const priorityClass = task.priority ? `task-priority-${task.priority.level}` : 'task-priority-null';
             
-            taskElement.className = `task-item ${priorityClass}`;
+            // Déterminer la couleur selon la priorité
+            let bgColor = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            let textColor = '#374151';
+            let borderColor = '#9ca3af';
+            
+            if (task.priority) {
+                if (task.priority === 3) {
+                    bgColor = 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)';
+                    textColor = '#991b1b';
+                    borderColor = '#dc2626';
+                } else if (task.priority === 2) {
+                    bgColor = 'linear-gradient(135deg, #fffbeb 0%, #fed7aa 100%)';
+                    textColor = '#c2410c';
+                    borderColor = '#ea580c';
+                } else if (task.priority === 1) {
+                    bgColor = 'linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%)';
+                    textColor = '#166534';
+                    borderColor = '#16a34a';
+                }
+            }
             
             // Vérifier si la tâche est en retard
-            const today = new Date();
             const taskDate = new Date(task.deadline);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
             if (taskDate < today && !task.completed_at) {
-                taskElement.classList.add('task-overdue');
+                bgColor = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                textColor = 'white';
+                borderColor = '#7f1d1d';
             }
             
+            // Style adaptatif basé sur la vue actuelle
+            let style = '';
+            if (currentView === 'month') {
+                style = `background: ${bgColor}; color: ${textColor}; padding: 3px 6px; margin: 2px 0; border-radius: 4px; font-size: 10px; font-weight: 500; border-left: 3px solid ${borderColor}; cursor: pointer; transition: all 0.2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`;
+            } else if (currentView === 'week') {
+                style = `background: ${bgColor}; color: ${textColor}; padding: 6px 8px; margin: 4px 0; border-radius: 6px; font-size: 12px; font-weight: 500; border-left: 4px solid ${borderColor}; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s;`;
+            } else if (currentView === '3days') {
+                style = `background: ${bgColor}; color: ${textColor}; padding: 8px 10px; margin: 6px 0; border-radius: 8px; font-size: 13px; font-weight: 500; border-left: 4px solid ${borderColor}; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: all 0.3s;`;
+            } else { // day view
+                style = `background: ${bgColor}; color: ${textColor}; padding: 12px 16px; margin: 8px 0; border-radius: 10px; font-size: 14px; font-weight: 600; border-left: 5px solid ${borderColor}; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.15); transition: all 0.3s;`;
+            }
+            
+            taskElement.style.cssText = style;
             taskElement.textContent = task.title;
             
-            // Ajouter tooltip avec plus d'infos
-            let tooltipText = `Titre: ${task.title}`;
-            if (task.description) tooltipText += `\nDescription: ${task.description}`;
-            if (task.assignees && task.assignees.length > 0) {
-                tooltipText += `\nAssigné à: ${task.assignees.map(a => a.name).join(', ')}`;
-            }
-            if (task.priority) tooltipText += `\nPriorité: ${task.priority.label}`;
+            // Effet hover
+            taskElement.addEventListener('mouseenter', () => {
+                taskElement.style.transform = 'translateX(2px) scale(1.02)';
+                taskElement.style.boxShadow = '0 6px 12px rgba(0,0,0,0.2)';
+            });
             
-            taskElement.title = tooltipText;
+            taskElement.addEventListener('mouseleave', () => {
+                taskElement.style.transform = 'translateX(0) scale(1)';
+                if (currentView === 'month') {
+                    taskElement.style.boxShadow = 'none';
+                } else if (currentView === 'week') {
+                    taskElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                } else if (currentView === '3days') {
+                    taskElement.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+                } else {
+                    taskElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                }
+            });
             
-            // Ajouter un événement click pour plus de détails
+            // Click pour afficher les détails
             taskElement.addEventListener('click', () => {
-                alert(tooltipText);
+                const priorityText = task.priority ? 
+                    (task.priority === 3 ? 'Haute' : task.priority === 2 ? 'Moyenne' : 'Basse') : 
+                    'Non définie';
+                
+                let details = `Tâche: ${task.title}\nEchéance: ${new Date(task.deadline).toLocaleDateString('fr-FR')}\nPriorité: ${priorityText}`;
+                
+                if (task.description) {
+                    details += `\nDescription: ${task.description}`;
+                }
+                
+                if (task.assignees && task.assignees.length > 0) {
+                    details += `\nAssigné à: ${task.assignees.map(a => a.name).join(', ')}`;
+                }
+                
+                alert(details);
             });
             
             return taskElement;
@@ -390,11 +470,14 @@
         function updateCalendar() {
             const container = document.getElementById('calendar-container');
             container.innerHTML = '';
+            container.classList.remove('day-view'); // Reset class
             
             if (currentView === 'month') {
                 generateMonthView(container);
             } else if (currentView === 'week') {
                 generateWeekView(container);
+            } else if (currentView === '3days') {
+                generate3DaysView(container);
             } else if (currentView === 'day') {
                 generateDayView(container);
             }
@@ -523,6 +606,83 @@
             container.appendChild(grid);
         }
 
+        function generate3DaysView(container) {
+            // En-têtes des jours pour 3 jours
+            const headerGrid = document.createElement('div');
+            headerGrid.className = 'calendar-grid calendar-3days';
+            
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(currentDate);
+                date.setDate(currentDate.getDate() + i);
+                
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = `${dayNames[date.getDay()]} ${date.getDate()}/${date.getMonth() + 1}`;
+                headerGrid.appendChild(header);
+            }
+            
+            container.appendChild(headerGrid);
+            
+            // Grille des 3 jours
+            const grid = document.createElement('div');
+            grid.className = 'calendar-grid calendar-3days';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(currentDate);
+                date.setDate(currentDate.getDate() + i);
+                
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                cell.style.minHeight = '400px';
+                
+                if (date.toDateString() === today.toDateString()) {
+                    cell.classList.add('today');
+                }
+                
+                // Marquer les week-ends
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    cell.classList.add('weekend');
+                }
+                
+                // Titre du jour dans la cellule
+                const dayTitle = document.createElement('div');
+                dayTitle.className = 'font-bold text-sm mb-3 text-gray-700';
+                dayTitle.textContent = `${dayNames[date.getDay()]} ${date.getDate()}`;
+                cell.appendChild(dayTitle);
+                
+                // Ajouter les tâches pour cette date
+                const dayTasks = getTasksForDate(date);
+                
+                if (dayTasks.length === 0) {
+                    const noTasks = document.createElement('div');
+                    noTasks.className = 'text-gray-400 text-xs text-center py-4';
+                    noTasks.textContent = 'Aucune tâche';
+                    cell.appendChild(noTasks);
+                } else {
+                    dayTasks.forEach(task => {
+                        const taskElement = createTaskElement(task);
+                        
+                        // Ajouter des détails supplémentaires pour la vue 3 jours
+                        if (task.assignees && task.assignees.length > 0) {
+                            const assignees = document.createElement('div');
+                            assignees.className = 'task-detail';
+                            assignees.textContent = `👤 ${task.assignees.map(a => a.name.split(' ')[0]).join(', ')}`;
+                            taskElement.appendChild(assignees);
+                        }
+                        
+                        cell.appendChild(taskElement);
+                    });
+                }
+                
+                grid.appendChild(cell);
+            }
+            
+            container.appendChild(grid);
+        }
+        
         function generateDayView(container) {
             container.classList.add('day-view');
             
@@ -590,6 +750,8 @@
                 currentDate.setMonth(currentDate.getMonth() - 1);
             } else if (currentView === 'week') {
                 currentDate.setDate(currentDate.getDate() - 7);
+            } else if (currentView === '3days') {
+                currentDate.setDate(currentDate.getDate() - 3);
             } else if (currentView === 'day') {
                 currentDate.setDate(currentDate.getDate() - 1);
             }
@@ -601,6 +763,8 @@
                 currentDate.setMonth(currentDate.getMonth() + 1);
             } else if (currentView === 'week') {
                 currentDate.setDate(currentDate.getDate() + 7);
+            } else if (currentView === '3days') {
+                currentDate.setDate(currentDate.getDate() + 3);
             } else if (currentView === 'day') {
                 currentDate.setDate(currentDate.getDate() + 1);
             }
