@@ -33,4 +33,14 @@ public function statuses()
     return $this->hasMany(Status::class);
 }
 
+public function invitations()
+{
+    return $this->hasMany(ProjectInvitation::class);
+}
+
+public function pendingInvitations()
+{
+    return $this->hasMany(ProjectInvitation::class)->pending();
+}
+
 }

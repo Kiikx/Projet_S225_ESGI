@@ -49,18 +49,6 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Projet créé avec succès.');
     }
 
-    public function addMember(Request $request, Project $project)
-    {
-        $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-        ]);
-
-        if (!$project->members->contains($request->user_id)) {
-            $project->members()->attach($request->user_id);
-        }
-
-        return redirect()->back()->with('success', 'Utilisateur ajouté au projet.');
-    }
     public function removeMember(Project $project, User $user)
     {
         // Le propriétaire ne peut pas se retirer de son propre projet
@@ -86,11 +74,11 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $this->authorize('view', $project);
-        $availableUsers = User::whereNotIn('id', $project->members->pluck('id'))
-                             ->where('id', '!=', auth()->id())
-                             ->get();
+        
+        // Charger les invitations en cours
+        $project->load('pendingInvitations');
 
-        return view('projects.show', compact('project', 'availableUsers'));
+        return view('projects.show', compact('project'));
     }
 
     public function kanban(Project $project)

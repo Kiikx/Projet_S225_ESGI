@@ -120,20 +120,40 @@
                     @endif
 
                     @if($project->owner_id === auth()->id())
-                        <div class="border-t pt-4">
-                            <h4 class="text-sm font-medium text-gray-700 mb-3">Ajouter un nouveau membre</h4>
-                            <form action="{{ route('projects.addMember', $project) }}" method="POST">
-                                @csrf
-                                <select name="user_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                                    <option value="">-- Sélectionner un utilisateur --</option>
-                                    @foreach ($availableUsers as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                                    👥 Ajouter au projet
-                                </button>
-                            </form>
+                        <div class="border-t pt-4 space-y-4">
+                            <!-- Invitation par email -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-3">📧 Inviter par email</h4>
+                                <form action="{{ route('projects.invite', $project) }}" method="POST">
+                                    @csrf
+                                    <input type="email" name="email" placeholder="adresse@email.com" 
+                                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500" 
+                                           required>
+                                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                        📧 Envoyer une invitation
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Invitations en cours -->
+                            @if($project->pendingInvitations->count() > 0)
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                    <h5 class="text-sm font-medium text-yellow-800 mb-2">Invitations en cours</h5>
+                                    <div class="space-y-2">
+                                        @foreach($project->pendingInvitations as $invitation)
+                                            <div class="flex justify-between items-center text-sm">
+                                                <div class="text-yellow-700">
+                                                    <span>{{ $invitation->email }}</span>
+                                                    <span class="text-xs text-yellow-600 ml-2">
+                                                        (expire le {{ $invitation->expires_at->format('d/m/Y') }})
+                                                    </span>
+                                                </div>
+                                                <span class="text-yellow-600 text-xs">En attente</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endif
                 </div>

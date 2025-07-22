@@ -27,7 +27,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
-    Route::post('/projects/{project}/add-member', [ProjectController::class, 'addMember'])->name('projects.addMember');
     Route::delete('/projects/{project}/remove-member/{user}', [ProjectController::class, 'removeMember'])->name('projects.removeMember');
 
     Route::resource('projects.tasks', TaskController::class)->shallow();
@@ -46,7 +45,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects/{project}/statuses', [StatusController::class, 'store'])->name('projects.statuses.store');
     Route::delete('/projects/{project}/statuses/{status}', [StatusController::class, 'destroy'])->name('projects.statuses.destroy');
 
+    // Routes pour les invitations par email
+    Route::post('/projects/{project}/invite', [\App\Http\Controllers\ProjectInvitationController::class, 'store'])->name('projects.invite');
+
 });
+
+// Routes publiques pour les invitations (pas besoin d'être connecté)
+Route::get('/invitations/{token}', [\App\Http\Controllers\ProjectInvitationController::class, 'show'])->name('invitations.show');
+Route::post('/invitations/{token}/accept', [\App\Http\Controllers\ProjectInvitationController::class, 'accept'])->name('invitations.accept');
+Route::get('/invitations/{token}/accept', [\App\Http\Controllers\ProjectInvitationController::class, 'accept'])->name('invitations.accept.get');
+Route::get('/invitations/{token}/decline', [\App\Http\Controllers\ProjectInvitationController::class, 'decline'])->name('invitations.decline');
 
 
 
