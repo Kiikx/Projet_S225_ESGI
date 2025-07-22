@@ -71,10 +71,18 @@ npm install
 
 # Générer la clé Laravel si elle n'existe pas
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    # Utiliser APP_KEY de Railway ou en générer une stable
+    if [ -z "$APP_KEY" ]; then
+        # Générer une clé basée sur des variables Railway (stable entre déploiements)
+        echo "[INFO] Génération APP_KEY stable pour Railway..."
+        STABLE_KEY=$(echo "base64:$(echo -n "$RAILWAY_STATIC_URL$MYSQL_URL" | openssl dgst -sha256 -binary | openssl base64 -A)")
+        export APP_KEY="$STABLE_KEY"
+    fi
+    
     # Sur Railway, créer un .env minimal avec configs essentielles
     echo "[INFO] Railway - création .env minimal avec configs essentielles"
     cat > .env << EOF
-APP_KEY=
+APP_KEY=$APP_KEY
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://$RAILWAY_STATIC_URL
@@ -86,15 +94,15 @@ LOG_LEVEL=error
 FORCE_HTTPS=true
 ASSET_URL=https://$RAILWAY_STATIC_URL
 
-# Mail configuration pour Mailtrap API (prod)
-MAIL_MAILER=mailtrap
-MAIL_HOST=sandbox.api.mailtrap.io
+# Mail configuration Gmail SMTP (prod)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=api
-MAIL_PASSWORD=\${MAILTRAP_API_TOKEN:-defaulttoken}
+MAIL_USERNAME=${GMAIL_USERNAME:-test@gmail.com}
+MAIL_PASSWORD=${GMAIL_APP_PASSWORD:-defaultpass}
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@$RAILWAY_STATIC_URL
-MAIL_FROM_NAME=Laravel
+MAIL_FROM_ADDRESS=${GMAIL_USERNAME:-test@gmail.com}
+MAIL_FROM_NAME=Kanban
 
 DB_CONNECTION=mysql
 DB_HOST=$DB_HOST
@@ -110,9 +118,9 @@ else
         cp .env.example .env
         echo "[INFO] Fichier .env créé depuis .env.example"
     fi
+    # En dev, générer la clé normalement
+    php artisan key:generate --force
 fi
-
-php artisan key:generate --force
 
 # Forcer HTTPS pour les assets et URLs sur Railway
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
