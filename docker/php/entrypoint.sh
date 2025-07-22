@@ -87,14 +87,12 @@ FORCE_HTTPS=true
 ASSET_URL=https://$RAILWAY_STATIC_URL
 
 # Mail configuration pour Mailtrap API (prod)
-MAIL_MAILER=smtp
-MAIL_HOST=live.smtp.mailtrap.io
-MAIL_PORT=587
-MAIL_USERNAME=api
-MAIL_PASSWORD=${MAILTRAP_API_TOKEN:-defaulttoken}
-MAIL_ENCRYPTION=tls
+MAIL_MAILER=mailtrap
+MAILTRAP_HOST=sandbox.api.mailtrap.io
+MAILTRAP_API_KEY=${MAILTRAP_API_TOKEN:-defaulttoken}
+MAILTRAP_INBOX_ID=1937660
 MAIL_FROM_ADDRESS=noreply@mailtrap.club
-MAIL_FROM_NAME=Laravel
+MAIL_FROM_NAME=Kanban
 
 DB_CONNECTION=mysql
 DB_HOST=$DB_HOST
