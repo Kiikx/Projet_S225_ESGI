@@ -13,9 +13,40 @@ class TaskController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index(Project $project): mixed
+    public function index(Request $request, Project $project): mixed
     {
-        return view('tasks.index', compact('project'));
+        $query = $project->tasks()->with(['priority', 'status', 'categories', 'creator']);
+        
+        // Recherche par titre
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+        
+        // Filtrage par priorité
+        if ($request->filled('priority')) {
+            $query->where('priority_id', $request->priority);
+        }
+        
+        // Filtrage par statut
+        if ($request->filled('status')) {
+            $query->where('status_id', $request->status);
+        }
+        
+        // Filtrage par catégorie
+        if ($request->filled('category')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category);
+            });
+        }
+        
+        $tasks = $query->get();
+        
+        // Récupérer les données pour les filtres
+        $priorities = \App\Models\Priority::all();
+        $statuses = $project->statuses;
+        $categories = \App\Models\Category::all();
+        
+        return view('tasks.index', compact('project', 'tasks', 'priorities', 'statuses', 'categories'));
     }
 
     public function create(Project $project)

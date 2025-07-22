@@ -32,7 +32,87 @@
             </div>
         </div>
 
-        @if($project->tasks->count())
+        <!-- Interface de recherche -->
+        <div class="glass-card rounded-xl p-6 animate-appear">
+            <div class="flex items-center space-x-3 mb-4">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-800">Rechercher et filtrer</h3>
+            </div>
+            
+            <form method="GET" action="">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Recherche par titre</label>
+                        <input type="text" name="search" placeholder="Titre de la tâche..." 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="{{ request('search') }}">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Priorité</label>
+                        <select name="priority" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Toutes les priorités</option>
+                            @foreach (($priorities ?? []) as $priority)
+                                <option value="{{ $priority->id }}" {{ request('priority') == $priority->id ? 'selected' : '' }}>{{ $priority->label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                        <select name="status" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Tous les statuts</option>
+                            @foreach (($statuses ?? []) as $status)
+                                <option value="{{ $status->id }}" {{ request('status') == $status->id ? 'selected' : '' }}>{{ $status->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
+                        <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Toutes les catégories</option>
+                            @foreach (($categories ?? []) as $category)
+                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        @if(request()->hasAny(['search', 'priority', 'status', 'category']))
+                            <span>Filtres actifs :</span>
+                            @if(request('search'))
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-1">"{{ request('search') }}"</span>
+                            @endif
+                        @endif
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        @if(request()->hasAny(['search', 'priority', 'status', 'category']))
+                            <a href="{{ route('projects.tasks.index', $project) }}" class="btn-outline">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Réinitialiser
+                            </a>
+                        @endif
+                        <button type="submit" class="btn-primary flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <span>Rechercher</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            </form>
+        </div>
+
+        @if($tasks->count())
             <!-- Tableau moderne -->
             <div class="glass-card rounded-xl overflow-hidden animate-appear">
                 <div class="overflow-x-auto">
@@ -49,7 +129,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            @foreach($project->tasks as $task)
+                            @foreach(($tasks ?? $project->tasks) as $task)
                                 <tr class="hover:bg-gray-50/50 transition-colors duration-200 animate-slide-in-up" style="animation-delay: {{ $loop->index * 0.05 }}s">
                                     <!-- Tâche -->
                                     <td class="px-6 py-4">
