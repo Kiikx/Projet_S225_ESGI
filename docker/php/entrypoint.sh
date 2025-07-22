@@ -90,6 +90,10 @@ APP_URL=https://$RAILWAY_PUBLIC_DOMAIN
 LOG_CHANNEL=stderr
 LOG_LEVEL=debug
 
+# Force HTTPS
+FORCE_HTTPS=true
+ASSET_URL=https://$RAILWAY_PUBLIC_DOMAIN
+
 DB_CONNECTION=mysql
 DB_HOST=$DB_HOST
 DB_PORT=$DB_PORT
@@ -110,6 +114,12 @@ else
 fi
 
 php artisan key:generate --force
+
+# Forcer HTTPS pour les assets et URLs sur Railway
+if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    echo "[INFO] Configuration HTTPS pour Railway..."
+    php artisan config:cache
+fi
 
 # Lancer les migrations automatiquement
 php artisan migrate --force
