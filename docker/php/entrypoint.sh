@@ -28,12 +28,33 @@ fi
 # Mapper les variables Railway vers Laravel (sur Railway seulement)
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
     echo "[INFO] Configuration Railway MySQL..."
-    export DB_HOST="${MYSQL_HOST:-127.0.0.1}"
-    export DB_PORT="${MYSQL_PORT:-3306}"
-    export DB_USERNAME="${MYSQL_USER:-laravel}"
-    export DB_PASSWORD="${MYSQL_PASSWORD:-laravel}"
-    export DB_DATABASE="${MYSQL_DATABASE:-kanboard}"
-    echo "[INFO] DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_USERNAME=$DB_USERNAME, DB_DATABASE=$DB_DATABASE"
+    
+    if [ -n "$MYSQL_URL" ]; then
+        echo "[INFO] Parsing MYSQL_URL: $MYSQL_URL"
+        
+        # Parser l'URL MySQL: mysql://user:pass@host:port/db
+        # Extraire les composants
+        DB_USERNAME=$(echo "$MYSQL_URL" | sed -n 's|mysql://\([^:]*\):.*|\1|p')
+        DB_PASSWORD=$(echo "$MYSQL_URL" | sed -n 's|mysql://[^:]*:\([^@]*\)@.*|\1|p')
+        DB_HOST=$(echo "$MYSQL_URL" | sed -n 's|mysql://[^@]*@\([^:]*\):.*|\1|p')
+        DB_PORT=$(echo "$MYSQL_URL" | sed -n 's|mysql://[^@]*@[^:]*:\([0-9]*\)/.*|\1|p')
+        DB_DATABASE=$(echo "$MYSQL_URL" | sed -n 's|mysql://[^/]*/\(.*\)|\1|p')
+        
+        export DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE
+        
+        echo "[INFO] Variables Laravel from MYSQL_URL:"
+        echo "DB_HOST=$DB_HOST"
+        echo "DB_PORT=$DB_PORT" 
+        echo "DB_USERNAME=$DB_USERNAME"
+        echo "DB_DATABASE=$DB_DATABASE"
+    else
+        echo "[WARNING] MYSQL_URL not found, using defaults"
+        export DB_HOST="127.0.0.1"
+        export DB_PORT="3306"
+        export DB_USERNAME="laravel"
+        export DB_PASSWORD="laravel"
+        export DB_DATABASE="kanboard"
+    fi
 fi
 
 # Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
