@@ -23,6 +23,15 @@ class AppServiceProvider extends ServiceProvider
         // Forcer HTTPS en production (Railway, etc.) pour les URLs signées aussi
         if (config('app.env') === 'production' || env('FORCE_HTTPS', false)) {
             URL::forceScheme('https');
+            
+            // Configurer les proxies Railway pour les URLs signées
+            \Illuminate\Http\Request::setTrustedProxies(
+                ['*'], // Railway utilise des proxies dynamiques
+                \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+                \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+                \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+                \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+            );
         }
     }
 }
