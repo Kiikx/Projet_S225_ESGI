@@ -1,7 +1,16 @@
 #!/bin/bash
 set -e
 
-cd /var/www
+# Déterminer le bon working directory selon l'environnement
+if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    # Sur Railway, Laravel est dans /var/www/src/
+    cd /var/www/src
+    echo "[INFO] Railway détecté - working directory: /var/www/src"
+else
+    # En dev local, le volume mount met Laravel directement dans /var/www/
+    cd /var/www
+    echo "[INFO] Dev local détecté - working directory: /var/www"
+fi
 
 # Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
 if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
