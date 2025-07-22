@@ -40,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('projects.kanban');
     Route::get('projects/{project}/calendar', [ProjectController::class, 'calendar'])->name('projects.calendar');
+    
+    // Routes API pour le calendrier
+    Route::get('projects/{project}/calendar/tasks', [\App\Http\Controllers\CalendarController::class, 'getTasks'])->name('projects.calendar.tasks');
+    Route::put('calendar/tasks/{task}/update', [\App\Http\Controllers\CalendarController::class, 'updateTask'])->name('calendar.tasks.update');
     Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus']);
 
     Route::post('/projects/{project}/statuses', [StatusController::class, 'store'])->name('projects.statuses.store');
