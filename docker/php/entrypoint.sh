@@ -86,12 +86,14 @@ LOG_LEVEL=error
 FORCE_HTTPS=true
 ASSET_URL=https://$RAILWAY_STATIC_URL
 
-# Mail configuration pour Mailtrap API (prod)
-MAIL_MAILER=mailtrap
-MAILTRAP_HOST=sandbox.api.mailtrap.io
-MAILTRAP_API_KEY=${MAILTRAP_API_TOKEN:-defaulttoken}
-MAILTRAP_INBOX_ID=1937660
-MAIL_FROM_ADDRESS=noreply@mailtrap.club
+# Mail configuration Gmail SMTP (prod)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=${GMAIL_USERNAME:-test@gmail.com}
+MAIL_PASSWORD=${GMAIL_APP_PASSWORD:-defaultpass}
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=${GMAIL_USERNAME:-test@gmail.com}
 MAIL_FROM_NAME=Kanban
 
 DB_CONNECTION=mysql
