@@ -1,11 +1,22 @@
 #!/bin/bash
 set -e
 
+# DEBUG: Voir ce qui est disponible dans le container
+echo "[DEBUG] Contenu de /var/www:"
+ls -la /var/www/
+echo "[DEBUG] Variables d'environnement Railway:"
+env | grep -E "(RAILWAY|PORT)" || echo "Aucune variable Railway trouvée"
+
 # Déterminer le bon working directory selon l'environnement
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
-    # Sur Railway, Laravel est dans /var/www/src/
-    cd /var/www/src
-    echo "[INFO] Railway détecté - working directory: /var/www/src"
+    # Vérifier si /var/www/src existe
+    if [ -d "/var/www/src" ]; then
+        cd /var/www/src
+        echo "[INFO] Railway détecté - working directory: /var/www/src"
+    else
+        echo "[WARNING] /var/www/src n'existe pas, reste dans /var/www"
+        cd /var/www
+    fi
 else
     # En dev local, le volume mount met Laravel directement dans /var/www/
     cd /var/www
