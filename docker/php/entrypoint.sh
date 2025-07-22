@@ -79,9 +79,21 @@ npm install
 
 # Générer la clé Laravel si elle n'existe pas
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
-    # Sur Railway, créer un .env minimal juste pour la clé APP_KEY
-    echo "[INFO] Railway - création .env minimal pour APP_KEY"
-    echo "APP_KEY=" > .env
+    # Sur Railway, créer un .env minimal avec configs essentielles
+    echo "[INFO] Railway - création .env minimal avec configs essentielles"
+    cat > .env << EOF
+APP_KEY=
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://\$RAILWAY_PUBLIC_DOMAIN
+
+DB_CONNECTION=mysql
+DB_HOST=\$DB_HOST
+DB_PORT=\$DB_PORT
+DB_DATABASE=\$DB_DATABASE
+DB_USERNAME=\$DB_USERNAME
+DB_PASSWORD=\$DB_PASSWORD
+EOF
 else
     # En dev local, créer le .env complet s'il n'existe pas
     envfile=".env"
