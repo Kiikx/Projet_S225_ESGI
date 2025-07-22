@@ -3,13 +3,17 @@ set -e
 
 cd /var/www
 
-# Attendre que MySQL soit disponible
-echo "[INFO] Attente de MySQL..."
-while ! php artisan migrate:status >/dev/null 2>&1; do
-    echo "[INFO] MySQL pas encore disponible, attente 3s..."
-    sleep 3
-done
-echo "[INFO] MySQL est prêt !"
+# Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
+if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
+    echo "[INFO] Attente de MySQL..."
+    while ! php artisan migrate:status >/dev/null 2>&1; do
+        echo "[INFO] MySQL pas encore disponible, attente 3s..."
+        sleep 3
+    done
+    echo "[INFO] MySQL est prêt !"
+else
+    echo "[INFO] Railway environnement détecté - skip du test MySQL"
+fi
 
 # Installer les dépendances PHP si vendor n'existe pas
 if [ ! -d "vendor" ]; then
