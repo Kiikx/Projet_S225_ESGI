@@ -78,16 +78,17 @@ fi
 npm install
 
 # Générer la clé Laravel si elle n'existe pas
-# Sur Railway, on skip la création du .env pour éviter d'overrider les variables d'environnement
-if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
-    # En dev local, créer le .env s'il n'existe pas
+if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    # Sur Railway, créer un .env minimal juste pour la clé APP_KEY
+    echo "[INFO] Railway - création .env minimal pour APP_KEY"
+    echo "APP_KEY=" > .env
+else
+    # En dev local, créer le .env complet s'il n'existe pas
     envfile=".env"
     if [ ! -f "$envfile" ]; then
         cp .env.example .env
         echo "[INFO] Fichier .env créé depuis .env.example"
     fi
-else
-    echo "[INFO] Railway détecté - skip création .env, utilisation variables d'environnement"
 fi
 
 php artisan key:generate --force
