@@ -6,6 +6,8 @@ echo "[DEBUG] Contenu de /var/www:"
 ls -la /var/www/
 echo "[DEBUG] Variables d'environnement Railway:"
 env | grep -E "(RAILWAY|PORT)" || echo "Aucune variable Railway trouvée"
+echo "[DEBUG] Variables MySQL Railway:"
+env | grep -E "MYSQL_" || echo "Aucune variable MySQL trouvée"
 
 # Déterminer le bon working directory selon l'environnement
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
@@ -21,6 +23,17 @@ else
     # En dev local, le volume mount met Laravel directement dans /var/www/
     cd /var/www
     echo "[INFO] Dev local détecté - working directory: /var/www"
+fi
+
+# Mapper les variables Railway vers Laravel (sur Railway seulement)
+if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
+    echo "[INFO] Configuration Railway MySQL..."
+    export DB_HOST="${MYSQL_HOST:-127.0.0.1}"
+    export DB_PORT="${MYSQL_PORT:-3306}"
+    export DB_USERNAME="${MYSQL_USER:-laravel}"
+    export DB_PASSWORD="${MYSQL_PASSWORD:-laravel}"
+    export DB_DATABASE="${MYSQL_DATABASE:-kanboard}"
+    echo "[INFO] DB_HOST=$DB_HOST, DB_PORT=$DB_PORT, DB_USERNAME=$DB_USERNAME, DB_DATABASE=$DB_DATABASE"
 fi
 
 # Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
