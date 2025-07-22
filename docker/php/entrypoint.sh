@@ -1,14 +1,6 @@
 #!/bin/bash
 set -e
 
-# DEBUG: Voir ce qui est disponible dans le container
-echo "[DEBUG] Contenu de /var/www:"
-ls -la /var/www/
-echo "[DEBUG] Variables d'environnement Railway:"
-env | grep -E "(RAILWAY|PORT)" || echo "Aucune variable Railway trouvée"
-echo "[DEBUG] Variables MySQL Railway:"
-env | grep -E "MYSQL_" || echo "Aucune variable MySQL trouvée"
-
 # Déterminer le bon working directory selon l'environnement
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
     # Vérifier si /var/www/src existe
@@ -84,11 +76,11 @@ if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
     cat > .env << EOF
 APP_KEY=
 APP_ENV=production
-APP_DEBUG=true
+APP_DEBUG=false
 APP_URL=https://$RAILWAY_PUBLIC_DOMAIN
 
 LOG_CHANNEL=stderr
-LOG_LEVEL=debug
+LOG_LEVEL=error
 
 # Force HTTPS
 FORCE_HTTPS=true
@@ -101,9 +93,6 @@ DB_DATABASE=$DB_DATABASE
 DB_USERNAME=$DB_USERNAME
 DB_PASSWORD=$DB_PASSWORD
 EOF
-    
-    echo "[DEBUG] Contenu du .env créé:"
-    cat .env
 else
     # En dev local, créer le .env complet s'il n'existe pas
     envfile=".env"
@@ -135,10 +124,6 @@ if ! npx vite build; then
     exit 1
 fi
 
-echo "[DEBUG] About to start PHP-FPM..."
-echo "[DEBUG] PHP version: $(php --version | head -n1)"
-echo "[DEBUG] Current directory: $(pwd)"
-echo "[DEBUG] Available files: $(ls -la | head -5)"
 
 # Détecter l'environnement et démarrer le bon serveur
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
