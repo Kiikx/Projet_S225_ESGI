@@ -28,6 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Vérifier s'il y a un token d'invitation en session
+        if ($request->session()->has('invitation_token')) {
+            $token = $request->session()->get('invitation_token');
+            $request->session()->forget('invitation_token');
+            
+            // Rediriger vers l'acceptation automatique de l'invitation
+            return redirect()->route('invitations.accept.get', $token);
+        }
+
         return redirect()->route('projects.index');
     }
 

@@ -1,3 +1,16 @@
-@props(['disabled' => false, 'rows' => 4])
+@props(['disabled'  => false, 'rows' => 4])
 
-<textarea @disabled($disabled) rows="{{ $rows }}" {{ $attributes->merge(['class' => 'w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 hover:border-neutral-400 disabled:bg-neutral-100 disabled:cursor-not-allowed shadow-sm resize-none']) }}>{{ $slot }}</textarea>
+@php
+    // Récupérer le nom du champ depuis les attributs
+    $fieldName = $attributes->get('name');
+    // Vérifier s'il y a une erreur pour ce champ
+    $hasError = $errors->has($fieldName);
+    // Classes CSS de base
+    $baseClasses = 'w-full px-4 py-3 bg-white rounded-xl text-neutral-900 placeholder-neutral-500 focus:outline-none transition-all duration-200 shadow-sm resize-none disabled:bg-neutral-100 disabled:cursor-not-allowed';
+    // Classes selon l'état d'erreur
+    $stateClasses = $hasError 
+        ? 'border-red-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-600'
+        : 'border-neutral-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent hover:border-neutral-400';
+@endphp
+
+<textarea @disabled($disabled) rows="{{ $rows }}" {{ $attributes->merge(['class' => $baseClasses . ' ' . $stateClasses]) }}>{{ $slot }}</textarea>

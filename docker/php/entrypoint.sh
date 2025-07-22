@@ -49,7 +49,16 @@ if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
     fi
 fi
 
+# Installer les dépendances PHP si vendor n'existe pas
+if [ ! -d "vendor" ]; then
+    composer install
+fi
+
+# Installer les dépendances JS à chaque démarrage (plus sûr)
+npm install
+
 # Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
+# IMPORTANT: Après l'installation des dépendances pour que 'php artisan' fonctionne
 if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
     echo "[INFO] Attente de MySQL..."
     while ! php artisan migrate:status >/dev/null 2>&1; do
@@ -60,14 +69,6 @@ if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
 else
     echo "[INFO] Railway environnement détecté - skip du test MySQL"
 fi
-
-# Installer les dépendances PHP si vendor n'existe pas
-if [ ! -d "vendor" ]; then
-    composer install
-fi
-
-# Installer les dépendances JS à chaque démarrage (plus sûr)
-npm install
 
 # Générer la clé Laravel si elle n'existe pas
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
