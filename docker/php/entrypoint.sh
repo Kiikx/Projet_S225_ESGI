@@ -53,24 +53,10 @@ fi
 if [ ! -d "vendor" ]; then
     composer install
 fi
-
 # Installer les dépendances JS à chaque démarrage (plus sûr)
 npm install
 
-# Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
-# IMPORTANT: Après l'installation des dépendances pour que 'php artisan' fonctionne
-if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
-    echo "[INFO] Attente de MySQL..."
-    while ! php artisan migrate:status >/dev/null 2>&1; do
-        echo "[INFO] MySQL pas encore disponible, attente 3s..."
-        sleep 3
-    done
-    echo "[INFO] MySQL est prêt !"
-else
-    echo "[INFO] Railway environnement détecté - skip du test MySQL"
-fi
-
-# Générer la clé Laravel si elle n'existe pas
+# Générer la configuration .env AVANT de tester MySQL
 if [ "$RAILWAY_ENVIRONMENT" = "production" ] || [ -n "$PORT" ]; then
     # Utiliser APP_KEY de Railway ou en générer une stable
     if [ -z "$APP_KEY" ]; then
@@ -121,6 +107,19 @@ else
     fi
     # En dev, générer la clé normalement
     php artisan key:generate --force
+fi
+
+# Attendre que MySQL soit disponible (seulement en dev, Railway gère ça)
+# IMPORTANT: Après la création du .env pour que 'php artisan' fonctionne
+if [ "$RAILWAY_ENVIRONMENT" != "production" ] && [ -z "$PORT" ]; then
+    echo "[INFO] Attente de MySQL..."
+    while ! php artisan migrate:status > /dev/null 2>&1; do
+        echo "[INFO] MySQL pas encore disponible, attente 3s..."
+        sleep 3
+    done
+    echo "[INFO] MySQL est prêt !"
+else
+    echo "[INFO] Railway environnement détecté - skip du test MySQL"
 fi
 
 # Forcer HTTPS pour les assets et URLs sur Railway
